@@ -11,11 +11,10 @@ GIT_USER_NAME="${GIT_USER_NAME:-rmfakecloud-sync}"
 RMAPI_STATE_DIR="${RMAPI_STATE_DIR:-/state/rmapi}"
 VAULT_CHECKOUT="${VAULT_CHECKOUT:-/state/vault}"
 DOWNLOAD_DIR="/tmp/rmapi-dl"
-XOCHITL_DIR="/tmp/xochitl"
 
 export HOME=/root
 export XDG_CONFIG_HOME=/state
-mkdir -p "$RMAPI_STATE_DIR" "$VAULT_CHECKOUT" "$HOME/.ssh" "$DOWNLOAD_DIR" "$XOCHITL_DIR"
+mkdir -p "$RMAPI_STATE_DIR" "$VAULT_CHECKOUT" "$HOME/.ssh" "$DOWNLOAD_DIR"
 
 if [ ! -f "$RMAPI_STATE_DIR/rmapi.conf" ] && [ -n "${RMAPI_AUTH_B64:-}" ]; then
   echo "[init] seeding rmapi auth from env"
@@ -47,16 +46,10 @@ cd "$DOWNLOAD_DIR"
 rmapi -ni mget / || echo "[rmapi] mget reported errors, continuing"
 echo "[rmapi] downloaded $(find "$DOWNLOAD_DIR" -name '*.rmdoc' | wc -l) .rmdoc files"
 
-echo "[extract] unpacking .rmdoc archives into xochitl layout"
-rm -rf "$XOCHITL_DIR" && mkdir -p "$XOCHITL_DIR"
-find "$DOWNLOAD_DIR" -name '*.rmdoc' -print0 | while IFS= read -r -d '' rmdoc; do
-  unzip -oq "$rmdoc" -d "$XOCHITL_DIR"
-done
-
-echo "[convert] clearing $VAULT_SUBDIR and regenerating from scratch"
+echo "[convert] clearing $VAULT_SUBDIR and regenerating with folder hierarchy"
 rm -rf "${VAULT_CHECKOUT:?}/${VAULT_SUBDIR:?}"
 mkdir -p "$VAULT_CHECKOUT/$VAULT_SUBDIR"
-python /app/convert_all.py "$XOCHITL_DIR" "$VAULT_CHECKOUT/$VAULT_SUBDIR"
+python /app/convert_all.py "$DOWNLOAD_DIR" "$VAULT_CHECKOUT/$VAULT_SUBDIR"
 
 cd "$VAULT_CHECKOUT"
 if [ -z "$(git status --porcelain "$VAULT_SUBDIR")" ]; then
