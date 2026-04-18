@@ -56,7 +56,7 @@ done
 echo "[convert] clearing $VAULT_SUBDIR and regenerating from scratch"
 rm -rf "${VAULT_CHECKOUT:?}/${VAULT_SUBDIR:?}"
 mkdir -p "$VAULT_CHECKOUT/$VAULT_SUBDIR"
-python /app/main.py -i "$XOCHITL_DIR" -o "$VAULT_CHECKOUT/$VAULT_SUBDIR" || echo "[convert] non-zero exit, continuing"
+python /app/convert_all.py "$XOCHITL_DIR" "$VAULT_CHECKOUT/$VAULT_SUBDIR"
 
 cd "$VAULT_CHECKOUT"
 if [ -z "$(git status --porcelain "$VAULT_SUBDIR")" ]; then

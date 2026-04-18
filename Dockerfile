@@ -18,6 +18,7 @@ RUN mkdir -p /app \
     && curl -sSL https://raw.githubusercontent.com/EelcovanVeldhuizen/remarkable-obsidian-sync/main/main.py -o /app/main.py
 
 COPY sync.sh /app/sync.sh
+COPY convert_all.py /app/convert_all.py
 RUN chmod +x /app/sync.sh
 
 WORKDIR /app
