@@ -14,7 +14,8 @@ RUN pip install --no-cache-dir \
       pdf2image \
       "git+https://github.com/EelcovanVeldhuizen/rmc.git@Excalidraw"
 
-RUN curl -sSL https://raw.githubusercontent.com/EelcovanVeldhuizen/remarkable-obsidian-sync/main/main.py -o /app/main.py
+RUN mkdir -p /app \
+    && curl -sSL https://raw.githubusercontent.com/EelcovanVeldhuizen/remarkable-obsidian-sync/main/main.py -o /app/main.py
 
 COPY sync.sh /app/sync.sh
 RUN chmod +x /app/sync.sh
