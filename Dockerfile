@@ -20,4 +20,4 @@ COPY sync.sh /app/sync.sh
 RUN chmod +x /app/sync.sh
 
 WORKDIR /app
-CMD ["/app/sync.sh"]
+CMD ["sh", "-c", "echo 'sync container ready, trigger /app/sync.sh via Dokploy Schedule'; exec tail -f /dev/null"]
