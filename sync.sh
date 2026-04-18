@@ -14,13 +14,13 @@ DOWNLOAD_DIR="/tmp/rmapi-dl"
 XOCHITL_DIR="/tmp/xochitl"
 
 export HOME=/root
-mkdir -p "$RMAPI_STATE_DIR" "$VAULT_CHECKOUT" "$HOME/.ssh" "$DOWNLOAD_DIR" "$XOCHITL_DIR" "$HOME/.config"
+export XDG_CONFIG_HOME=/state
+mkdir -p "$RMAPI_STATE_DIR" "$VAULT_CHECKOUT" "$HOME/.ssh" "$DOWNLOAD_DIR" "$XOCHITL_DIR"
 
 if [ ! -f "$RMAPI_STATE_DIR/rmapi.conf" ] && [ -n "${RMAPI_AUTH_B64:-}" ]; then
   echo "[init] seeding rmapi auth from env"
   echo "$RMAPI_AUTH_B64" | base64 -d > "$RMAPI_STATE_DIR/rmapi.conf"
 fi
-ln -sfn "$RMAPI_STATE_DIR" "$HOME/.config/rmapi"
 
 if [ -n "${SSH_DEPLOY_KEY_B64:-}" ]; then
   echo "$SSH_DEPLOY_KEY_B64" | base64 -d > "$HOME/.ssh/id_ed25519"
@@ -41,10 +41,11 @@ git fetch origin "$VAULT_BRANCH"
 git reset --hard "origin/$VAULT_BRANCH"
 mkdir -p "$VAULT_SUBDIR"
 
-echo "[rmapi] pulling all documents"
+echo "[rmapi] pulling all documents (full refresh)"
 rm -rf "$DOWNLOAD_DIR" && mkdir -p "$DOWNLOAD_DIR"
 cd "$DOWNLOAD_DIR"
-rmapi -ni mget -i / || echo "[rmapi] mget reported errors, continuing"
+rmapi -ni mget / || echo "[rmapi] mget reported errors, continuing"
+echo "[rmapi] downloaded $(find "$DOWNLOAD_DIR" -name '*.rmdoc' | wc -l) .rmdoc files"
 
 echo "[extract] unpacking .rmdoc archives into xochitl layout"
 rm -rf "$XOCHITL_DIR" && mkdir -p "$XOCHITL_DIR"
@@ -52,7 +53,9 @@ find "$DOWNLOAD_DIR" -name '*.rmdoc' -print0 | while IFS= read -r -d '' rmdoc; d
   unzip -oq "$rmdoc" -d "$XOCHITL_DIR"
 done
 
-echo "[convert] running remarkable-obsidian-sync"
+echo "[convert] clearing $VAULT_SUBDIR and regenerating from scratch"
+rm -rf "${VAULT_CHECKOUT:?}/${VAULT_SUBDIR:?}"
+mkdir -p "$VAULT_CHECKOUT/$VAULT_SUBDIR"
 python /app/main.py -i "$XOCHITL_DIR" -o "$VAULT_CHECKOUT/$VAULT_SUBDIR" || echo "[convert] non-zero exit, continuing"
 
 cd "$VAULT_CHECKOUT"
