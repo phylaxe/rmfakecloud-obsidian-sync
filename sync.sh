@@ -44,7 +44,7 @@ mkdir -p "$VAULT_SUBDIR"
 echo "[rmapi] pulling all documents"
 rm -rf "$DOWNLOAD_DIR" && mkdir -p "$DOWNLOAD_DIR"
 cd "$DOWNLOAD_DIR"
-rmapi -ni mget -r / . || echo "[rmapi] mget reported errors, continuing"
+rmapi -ni mget -i / || echo "[rmapi] mget reported errors, continuing"
 
 echo "[extract] unpacking .rmdoc archives into xochitl layout"
 rm -rf "$XOCHITL_DIR" && mkdir -p "$XOCHITL_DIR"
