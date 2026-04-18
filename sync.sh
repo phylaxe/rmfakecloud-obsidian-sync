@@ -14,13 +14,13 @@ DOWNLOAD_DIR="/tmp/rmapi-dl"
 XOCHITL_DIR="/tmp/xochitl"
 
 export HOME=/root
-mkdir -p "$RMAPI_STATE_DIR" "$VAULT_CHECKOUT" "$HOME/.ssh" "$DOWNLOAD_DIR" "$XOCHITL_DIR"
+mkdir -p "$RMAPI_STATE_DIR" "$VAULT_CHECKOUT" "$HOME/.ssh" "$DOWNLOAD_DIR" "$XOCHITL_DIR" "$HOME/.config"
 
-if [ ! -f "$RMAPI_STATE_DIR/rmapi" ] && [ -n "${RMAPI_AUTH_B64:-}" ]; then
+if [ ! -f "$RMAPI_STATE_DIR/rmapi.conf" ] && [ -n "${RMAPI_AUTH_B64:-}" ]; then
   echo "[init] seeding rmapi auth from env"
-  echo "$RMAPI_AUTH_B64" | base64 -d > "$RMAPI_STATE_DIR/rmapi"
+  echo "$RMAPI_AUTH_B64" | base64 -d > "$RMAPI_STATE_DIR/rmapi.conf"
 fi
-ln -sf "$RMAPI_STATE_DIR/rmapi" "$HOME/.rmapi"
+ln -sfn "$RMAPI_STATE_DIR" "$HOME/.config/rmapi"
 
 if [ -n "${SSH_DEPLOY_KEY_B64:-}" ]; then
   echo "$SSH_DEPLOY_KEY_B64" | base64 -d > "$HOME/.ssh/id_ed25519"
